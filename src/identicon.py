@@ -1,18 +1,15 @@
 import hashlib
 import colorsys
 import numpy as np
-import matplotlib.pyplot as plt
-
-COLOR_BG = 240 / 255
-ID_WIDTH = 420
-ID_HEIGHT = 420
-N_BLOCK = 5
+from constants import COLOR_BG, ID_WIDTH, ID_HEIGHT, N_BLOCK
 
 
-def get_hash(name):
-    if isinstance(name, str):
-        name = name.encode()
-    return hashlib.md5(name).hexdigest()
+def get_hash(userid):
+    if isinstance(userid, int):
+        userid = str(userid).encode()
+    if isinstance(userid, str):
+        userid = userid.encode()
+    return hashlib.md5(userid).hexdigest()
 
 
 def get_pattern(md5):
@@ -26,8 +23,8 @@ def get_color(md5):
     return colorsys.hls_to_rgb(hue, lightness, saturation)
 
 
-def create_identicon(name):
-    md5 = get_hash(name)
+def create_identicon(userid):
+    md5 = get_hash(userid)
     pattern = get_pattern(md5)
     color = get_color(md5)
 

@@ -30,3 +30,8 @@ SEEDS = {
         [1, 0, 1, 0, 1],
     ],
 }
+
+COLOR_BG = 240 / 255
+ID_WIDTH = 420
+ID_HEIGHT = 420
+N_BLOCK = 5
