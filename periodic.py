@@ -20,7 +20,7 @@ def main(
     output=None,
 ):
     pattern, color = parse_github_id(username)
-    game = GameOfLife(size)
+    game = GameOfLife(size, boundary="periodic")
     for i in range(-(distribute[0] // 2), (distribute[0] // 2) + 1):
         for j in range(-(distribute[1] // 2), (distribute[1] // 2) + 1):
             game.set_seed(
@@ -45,21 +45,8 @@ def main(
             break
 
     print("generating images")
-    where = np.where(np.array(pattern_list))
-    width = max(
-        np.max(abs(where[1] - size[0] // 2)),
-        np.max(abs(where[2] - size[1] // 2)),
-    )
     for i, pattern in tqdm(enumerate(pattern_list), total=len(pattern_list)):
-        plt.imsave(
-            os.path.join(output, f"{i:08}.png"),
-            drawer.draw(
-                pattern[
-                    size[0] // 2 - width - 1 : size[0] // 2 + width + 2,
-                    size[1] // 2 - width - 1 : size[1] // 2 + width + 2,
-                ]
-            ),
-        )
+        plt.imsave(os.path.join(output, f"{i:08}.png"), drawer.draw(pattern))
 
 
 def parse_args():
