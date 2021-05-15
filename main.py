@@ -12,6 +12,7 @@ from src.drawer import Drawer
 def main(
     size,
     username,
+    boundary,
     quality=200,
     cmap="Purples",
     n_generations=50,
@@ -19,7 +20,7 @@ def main(
     output=None,
 ):
     pattern, color = parse_github_id(username)
-    game = GameOfLife(size)
+    game = GameOfLife(size, boundary=boundary)
     game.set_seed(
         pattern,
         [(size[0] - pattern.shape[0]) // 2, (size[1] - pattern.shape[1]) // 2],
@@ -32,9 +33,13 @@ def main(
     for i in tqdm(range(n_generations)):
         pattern = game.get_map()
         plt.imsave(os.path.join(output, f"{i:08}.png"), drawer.draw(pattern))
+
         if not np.sum(pattern):
             break
-        game.step()
+
+        stable = game.step()
+        if stable:
+            break
 
 
 def parse_args():
@@ -44,11 +49,12 @@ def parse_args():
     parser.add_argument(
         "--size",
         type=str,
-        default="11,11",
+        default="9,9",
         help="comma-separated dimensions of universe (x by y)",
     )
-    parser.add_argument("--username", type=str, required=True)
+    parser.add_argument("-username", type=str, required=True)
     parser.add_argument("-n", type=int, default=50, help="number of universe iterations")
+    parser.add_argument("-boundary", type=str, default=None)
     parser.add_argument("-quality", type=int, default=100, help="image quality in DPI")
     parser.add_argument("-cmap", type=str, default="Purples", help="colour scheme")
     parser.add_argument(
@@ -72,6 +78,7 @@ if __name__ == "__main__":
             int(args.size.split(",")[1]),
         ),
         username=args.username,
+        boundary=args.boundary,
         quality=args.quality,
         cmap=args.cmap,
         n_generations=args.n,
