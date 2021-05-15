@@ -1,7 +1,18 @@
+import json
 import hashlib
 import colorsys
+from urllib.request import urlopen
 import numpy as np
-from constants import COLOR_BG, ID_WIDTH, ID_HEIGHT, N_BLOCK
+
+
+def get_github_id(login_name):
+    url = f"https://api.github.com/users/{login_name}"
+    with urlopen(url) as webfile:
+        string = webfile.read().decode()
+    user_info = json.loads(string)
+    user_id = user_info.get("id")
+
+    return user_id
 
 
 def get_hash(userid):
@@ -13,7 +24,14 @@ def get_hash(userid):
 
 
 def get_pattern(md5):
-    return [int(i, 16) % 2 == 0 for i in md5[:15]]
+    code = [int(i, 16) % 2 == 0 for i in md5[:15]]
+    pattern = np.zeros((5, 5), dtype=np.int)
+    for digit, sign in enumerate(code):
+        row = digit % 5
+        column = digit // 5 + 2
+        pattern[row, column] = sign
+    pattern[:, :2] = pattern[:, :2:-1]
+    return pattern
 
 
 def get_color(md5):
@@ -23,25 +41,10 @@ def get_color(md5):
     return colorsys.hls_to_rgb(hue, lightness, saturation)
 
 
-def create_identicon(userid):
+def parse_github_id(username):
+    userid = get_github_id(username)
     md5 = get_hash(userid)
     pattern = get_pattern(md5)
     color = get_color(md5)
 
-    image = np.full([ID_HEIGHT, ID_WIDTH, 3], COLOR_BG, dtype=np.float)
-
-    block_width = ID_WIDTH // (N_BLOCK + 1)
-    block_height = ID_HEIGHT // (N_BLOCK + 1)
-    margin_l = (ID_WIDTH - N_BLOCK * block_width) // 2
-    margin_t = (ID_HEIGHT - N_BLOCK * block_height) // 2
-
-    for j in range((N_BLOCK + 1) // 2):
-        for i in range(N_BLOCK):
-            if pattern[i + j * 5]:
-                image[
-                    margin_t + i * block_height : margin_t + (i + 1) * block_height,
-                    margin_l + (j + 2) * block_width : margin_l + (j + 3) * block_width,
-                ] = np.array(color)
-
-    image[:, : ID_WIDTH // 2] = image[:, : ID_WIDTH // 2 - 1 : -1]
-    return image
+    return pattern, color

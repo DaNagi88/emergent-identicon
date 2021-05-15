@@ -19,7 +19,7 @@ class GameOfLife(object):
         x_end, y_end = x_start + seed_array.shape[0], y_start + seed_array.shape[1]
         self.__universe[x_start:x_end, y_start:y_end] = seed_array
 
-    def get_image(self):
+    def get_map(self):
         return self.__universe
 
     def __survival(self, x, y):
